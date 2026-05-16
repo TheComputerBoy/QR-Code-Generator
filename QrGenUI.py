@@ -1,136 +1,594 @@
+import sys
+
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QColor
+from PyQt5.QtWidgets import (
+    QMainWindow,
+    QWidget,
+    QLabel,
+    QPushButton,
+    QTextEdit,
+    QVBoxLayout,
+    QHBoxLayout,
+    QFrame,
+    QCheckBox,
+    QSizePolicy,
+    QGraphicsDropShadowEffect,
+)
 
 
-class Ui_MainWindow(object):
-    def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(637, 403)
-        MainWindow.setTabShape(QtWidgets.QTabWidget.Rounded)
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
-        self.centralwidget.setObjectName("centralwidget")
-        self.lblIMG = QtWidgets.QLabel(self.centralwidget)
-        self.lblIMG.setGeometry(QtCore.QRect(360, 30, 250, 250))
-        self.lblIMG.setFrameShape(QtWidgets.QFrame.Box)
-        self.lblIMG.setLineWidth(1)
-        self.lblIMG.setText("")
-        self.lblIMG.setPixmap(QtGui.QPixmap("E:/2-C Downloads/Image_placeholder.jpg"))
-        self.lblIMG.setScaledContents(True)
-        self.lblIMG.setAlignment(QtCore.Qt.AlignBottom|QtCore.Qt.AlignHCenter)
-        self.lblIMG.setWordWrap(False)
-        self.lblIMG.setObjectName("lblIMG")
-        self.pushButton = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton.setGeometry(QtCore.QRect(360, 310, 251, 51))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.pushButton.setFont(font)
-        self.pushButton.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
-        self.pushButton.setAutoRepeat(False)
-        self.pushButton.setObjectName("pushButton")
-        self.label = QtWidgets.QLabel(self.centralwidget)
-        self.label.setGeometry(QtCore.QRect(20, 30, 111, 21))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.label.setFont(font)
-        self.label.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.label.setObjectName("label")
-        self.checkBox = QtWidgets.QCheckBox(self.centralwidget)
-        self.checkBox.setGeometry(QtCore.QRect(140, 120, 151, 31))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.checkBox.setFont(font)
-        self.checkBox.setObjectName("checkBox")
-        self.plainTextEdit = QtWidgets.QPlainTextEdit(self.centralwidget)
-        self.plainTextEdit.setGeometry(QtCore.QRect(140, 29, 201, 81))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.plainTextEdit.setFont(font)
-        self.plainTextEdit.setObjectName("txtQRdata")
-        self.lineEdit = QtWidgets.QLineEdit(self.centralwidget)
-        self.lineEdit.setGeometry(QtCore.QRect(140, 170, 131, 29))
-        font = QtGui.QFont()
-        font.setFamily("Lucida Console")
-        font.setPointSize(12)
-        font.setBold(False)
-        font.setWeight(50)
-        self.lineEdit.setFont(font)
-        self.lineEdit.setAlignment(QtCore.Qt.AlignCenter)
-        self.lineEdit.setObjectName("txtBackclr")
-        self.label_2 = QtWidgets.QLabel(self.centralwidget)
-        self.label_2.setGeometry(QtCore.QRect(20, 173, 111, 21))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.label_2.setFont(font)
-        self.label_2.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.label_2.setObjectName("lblBackColor")
-        self.label_3 = QtWidgets.QLabel(self.centralwidget)
-        self.label_3.setGeometry(QtCore.QRect(20, 210, 111, 21))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.label_3.setFont(font)
-        self.label_3.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.label_3.setObjectName("lblCenterColor")
-        self.lineEdit_2 = QtWidgets.QLineEdit(self.centralwidget)
-        self.lineEdit_2.setGeometry(QtCore.QRect(140, 207, 131, 29))
-        font = QtGui.QFont()
-        font.setFamily("Lucida Console")
-        font.setPointSize(12)
-        font.setBold(False)
-        font.setWeight(50)
-        self.lineEdit_2.setFont(font)
-        self.lineEdit_2.setAlignment(QtCore.Qt.AlignCenter)
-        self.lineEdit_2.setObjectName("txtCenterclr")
-        self.label_4 = QtWidgets.QLabel(self.centralwidget)
-        self.label_4.setGeometry(QtCore.QRect(20, 253, 111, 21))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.label_4.setFont(font)
-        self.label_4.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.label_4.setObjectName("lblEdgeColor")
+class QRGenerator(QMainWindow):
 
-        #custom
-        self.label_5 = QtWidgets.QLabel(self.centralwidget)
-        self.label_5.setGeometry(QtCore.QRect(10, 300,380, 80))
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        self.label_5.setFont(font)
-        self.label_5.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.label_5.setObjectName("lblEdgeColor")
+    def __init__(self):
+        super().__init__()
 
-        self.lineEdit_3 = QtWidgets.QLineEdit(self.centralwidget)
-        self.lineEdit_3.setGeometry(QtCore.QRect(140, 250, 131, 29))
-        font = QtGui.QFont()
-        font.setFamily("Lucida Console")
-        font.setPointSize(12)
-        font.setBold(False)
-        font.setWeight(50)
-        self.lineEdit_3.setFont(font)
-        self.lineEdit_3.setAlignment(QtCore.Qt.AlignCenter)
-        self.lineEdit_3.setObjectName("txtEdgeclr")
-        MainWindow.setCentralWidget(self.centralwidget)
-        self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 637, 21))
-        self.menubar.setObjectName("menubar")
-        MainWindow.setMenuBar(self.menubar)
-        self.statusbar = QtWidgets.QStatusBar(MainWindow)
-        self.statusbar.setObjectName("statusbar")
-        MainWindow.setStatusBar(self.statusbar)
+        self.bg_color = "#FFFFFF"
+        self.center_color = "#000000"
+        self.edge_color = "#000000"
 
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        self.initUI()
 
-    def retranslateUi(self, MainWindow):
-        _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "QR CODE GENERATOR"))
-        self.pushButton.setText(_translate("MainWindow", "Generate QR Code"))
-        self.label.setText(_translate("MainWindow", "QR Code Text :"))
-        self.checkBox.setText(_translate("MainWindow", "Rounded Modules"))
-        self.plainTextEdit.setPlainText(_translate("MainWindow", ""
-""))
-        self.lineEdit.setText(_translate("MainWindow", "#ffffff"))
-        self.label_2.setText(_translate("MainWindow", "Back Color   :"))
-        self.label_3.setText(_translate("MainWindow", "Center Color   :"))
-        self.lineEdit_2.setText(_translate("MainWindow", "#000000"))
-        self.label_4.setText(_translate("MainWindow", "Edge Color   :"))
-        self.label_5.setText(_translate("MainWindow", ""))
-        self.lineEdit_3.setText(_translate("MainWindow", "#000000"))
-#import img_rc
+    # =========================================================
+    # MAIN UI
+    # =========================================================
+
+    def initUI(self):
+
+        self.setWindowTitle("QR Code Generator")
+
+        self.setFixedSize(1350, 960)
+
+        self.setStyleSheet("""
+        QMainWindow {
+            background-color: #f4f7fb;
+        }
+
+        QLabel {
+            color: #0f172a;
+            font-size: 14px;
+        }
+
+        QTextEdit {
+            background-color: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 18px;
+            padding: 14px;
+            font-size: 14px;
+            color: #0f172a;
+        }
+
+        QTextEdit:focus {
+            border: 2px solid #2563eb;
+        }
+
+        QPushButton {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 16px;
+            padding: 12px;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        QPushButton:hover {
+            background-color: #1d4ed8;
+        }
+
+        QPushButton:pressed {
+            background-color: #1e40af;
+        }
+
+        QCheckBox {
+            font-size: 14px;
+            spacing: 8px;
+        }
+
+        QScrollBar:vertical {
+            border: none;
+            background: transparent;
+            width: 10px;
+            margin: 0px;
+        }
+
+        QScrollBar::handle:vertical {
+            background: #cbd5e1;
+            border-radius: 5px;
+            min-height: 25px;
+        }
+
+        QScrollBar::add-line:vertical,
+        QScrollBar::sub-line:vertical {
+            height: 0px;
+        }
+        """)
+
+        # =====================================================
+        # CENTRAL WIDGET
+        # =====================================================
+
+        centralWidget = QWidget()
+
+        self.setCentralWidget(centralWidget)
+
+        self.mainLayout = QHBoxLayout(centralWidget)
+
+        self.mainLayout.setSpacing(25)
+
+        self.mainLayout.setContentsMargins(40, 40, 40, 40)
+
+        # =====================================================
+        # LEFT SIDEBAR
+        # =====================================================
+
+        self.sidebar = QFrame()
+
+        self.sidebar.setSizePolicy(
+            QSizePolicy.Fixed,
+            QSizePolicy.Expanding
+        )
+
+        self.sidebar.setMinimumWidth(370)
+
+        self.sidebar.setMaximumWidth(430)
+
+        self.sidebar.setStyleSheet("""
+        QFrame {
+            background-color: white;
+            border-radius: 26px;
+            border: none;
+        }
+        """)
+
+        self.addShadow(self.sidebar)
+
+        self.sidebarLayout = QVBoxLayout(self.sidebar)
+
+        self.sidebarLayout.setContentsMargins(
+            32,
+            32,
+            32,
+            32
+        )
+
+        self.sidebarLayout.setSpacing(22)
+
+        # =====================================================
+        # TITLE
+        # =====================================================
+
+        title = QLabel("⚡QR Code Settings")
+
+        title.setAlignment(Qt.AlignLeft)
+        title.setStyleSheet("""
+        font-size: 35px;
+        font-weight: 795;
+        color: #0f172a;
+        """)
+        title.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+
+        self.sidebarLayout.addWidget(title, alignment=Qt.AlignLeft)
+
+        # =====================================================
+        # QR TEXT
+        # =====================================================
+
+        qrLabel = QLabel("QR Code Text")
+
+        qrLabel.setStyleSheet("""
+        font-size: 16px;
+        font-weight: 700;
+        margin-top: 6px;
+        """)
+
+        self.sidebarLayout.addWidget(qrLabel)
+
+        self.textEdit = QTextEdit()
+
+        self.textEdit.setPlaceholderText(
+            "Enter text or URL for QR generation..."
+        )
+
+        self.textEdit.setMinimumHeight(140)
+
+        self.textEdit.setMaximumHeight(220)
+
+        self.textEdit.setStyleSheet("""
+        QTextEdit {
+            background-color: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 18px;
+            padding: 14px;
+            font-size: 14px;
+            color: #0f172a;
+        }
+
+        QTextEdit:focus {
+            border: 2px solid #2563eb;
+        }
+        """)
+
+        self.textEdit.setFrameShape(QtWidgets.QFrame.NoFrame)
+
+        self.sidebarLayout.addWidget(self.textEdit)
+
+        # =====================================================
+        # CHECKBOX
+        # =====================================================
+
+        self.roundedCheck = QCheckBox(
+            "Rounded Modules"
+        )
+
+        self.roundedCheck.setChecked(True)
+
+        self.sidebarLayout.addWidget(
+            self.roundedCheck
+        )
+
+        # =====================================================
+        # COLOR SECTION
+        # =====================================================
+
+        colorTitle = QLabel("🎨 Color Scheme")
+
+        colorTitle.setStyleSheet("""
+        font-size: 24px;
+        font-weight: 800;
+        margin-top: 8px;
+        """)
+
+        self.sidebarLayout.addWidget(colorTitle)
+
+        # BACKGROUND COLOR
+
+        self.bgButton = self.createColorRow(
+            "Background Color",
+            self.bg_color,
+            None
+        )
+
+        self.sidebarLayout.addWidget(
+            self.bgButton["widget"]
+        )
+
+        # CENTER COLOR
+
+        self.centerButton = self.createColorRow(
+            "Center Color",
+            self.center_color,
+            None
+        )
+
+        self.sidebarLayout.addWidget(
+            self.centerButton["widget"]
+        )
+
+        # EDGE COLOR
+
+        self.edgeButton = self.createColorRow(
+            "Edge Color",
+            self.edge_color,
+            None
+        )
+
+        self.sidebarLayout.addWidget(
+            self.edgeButton["widget"]
+        )
+
+        # =====================================================
+        # GENERATE BUTTON
+        # =====================================================
+
+        self.generateButton = QPushButton(
+            "🚀 Generate QR Code"
+        )
+
+        self.generateButton.setMinimumHeight(66)
+
+        self.generateButton.setCursor(
+            QtGui.QCursor(Qt.PointingHandCursor)
+        )
+
+        self.sidebarLayout.addWidget(
+            self.generateButton
+        )
+
+        # =====================================================
+        # INFO CARD
+        # =====================================================
+
+        infoCard = QFrame()
+
+        infoCard.setStyleSheet("""
+        QFrame {
+            background-color: transparent;
+            border: 2px solid #b3d9ff;
+            border-radius: 16px;
+        }
+        """)
+
+        infoLayout = QHBoxLayout(infoCard)
+
+        infoLayout.setContentsMargins(
+            16,
+            16,
+            16,
+            16
+        )
+
+        infoLayout.setSpacing(12)
+
+        infoIcon = QLabel("ℹ")
+
+        infoIcon.setStyleSheet("""
+        color: #2563eb;
+        font-size: 20px;
+        font-weight: 800;
+        border-radius: 12px;
+        border: 2px solid #2563eb;
+        """)
+
+        infoIcon.setFixedWidth(24)
+
+        infoLayout.addWidget(infoIcon, alignment=Qt.AlignTop)
+
+        infoLabel = QLabel(
+            "Enter QR text, customize colors, and click Generate to create your QR code."
+        )
+
+        infoLabel.setWordWrap(True)
+
+        infoLabel.setStyleSheet("""
+        color: #2563eb;
+        font-size: 13px;
+        font-weight: 500;
+        border: none;
+        background-color: transparent;
+        """)
+
+        infoLayout.addWidget(infoLabel)
+
+        self.sidebarLayout.addWidget(infoCard)
+
+        self.sidebarLayout.addStretch()
+
+        # =====================================================
+        # RIGHT PREVIEW PANEL
+        # =====================================================
+
+        self.previewCard = QFrame()
+
+        self.previewCard.setStyleSheet("""
+        QFrame {
+            background-color: white;
+            border-radius: 26px;
+        }
+        """)
+
+        self.addShadow(self.previewCard)
+
+        self.previewCard.setFixedWidth(760)
+        self.previewCard.setSizePolicy(
+            QSizePolicy.Fixed,
+            QSizePolicy.Expanding
+        )
+
+        self.previewLayout = QVBoxLayout(
+            self.previewCard
+        )
+
+        self.previewLayout.setContentsMargins(
+            36,
+            36,
+            36,
+            36
+        )
+
+        self.previewLayout.setSpacing(18)
+
+        # PREVIEW TITLE
+
+        previewTitle = QLabel(
+            "👁️ Preview"
+        )
+
+        previewTitle.setAlignment(Qt.AlignLeft)
+        previewTitle.setStyleSheet("""
+        font-size: 32px;
+        font-weight: 800;
+        """)
+        previewTitle.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+
+        self.previewLayout.addWidget(
+            previewTitle,
+            alignment=Qt.AlignLeft
+        )
+
+        # =====================================================
+        # PREVIEW CONTAINER
+        # =====================================================
+
+        self.previewContainer = QWidget()
+        self.previewContainer.setFixedWidth(700)
+        self.previewContainer.setSizePolicy(
+            QSizePolicy.Fixed,
+            QSizePolicy.Fixed
+        )
+
+        self.previewContainerLayout = QVBoxLayout(
+            self.previewContainer
+        )
+
+        self.previewContainerLayout.setContentsMargins(
+            0,
+            0,
+            0,
+            0
+        )
+
+        self.previewWrapper = QWidget()
+
+        self.previewWrapperLayout = QHBoxLayout(
+            self.previewWrapper
+        )
+
+        self.previewWrapperLayout.addStretch()
+
+        self.preview = QLabel()
+
+        self.preview.setFixedSize(
+            620,
+            620
+        )
+
+        self.preview.setSizePolicy(
+            QSizePolicy.Fixed,
+            QSizePolicy.Fixed
+        )
+
+        self.preview.setAlignment(Qt.AlignCenter)
+
+        self.preview.setStyleSheet("""
+        QLabel {
+            background-color: white;
+            border: 3px dashed #cbd5e1;
+            border-radius: 20px;
+            color: #9ca3af;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        """)
+
+        self.preview.setText("Your QR Code will appear here!\nEnter text and click Generate to see your QR Code preview!")
+
+        self.preview.setWordWrap(True)
+
+        self.previewWrapperLayout.addWidget(
+            self.preview
+        )
+
+        self.previewWrapperLayout.addStretch()
+
+        self.previewContainerLayout.addWidget(
+            self.previewWrapper
+        )
+
+        self.previewContainerLayout.addStretch()
+
+        self.previewLayout.addWidget(
+            self.previewContainer
+        )
+
+        # =====================================================
+        # ADD TO MAIN LAYOUT
+        # =====================================================
+
+        self.mainLayout.addWidget(
+            self.sidebar,
+            32
+        )
+
+        self.mainLayout.addWidget(
+            self.previewCard,
+            68
+        )
+
+    # =========================================================
+    # SHADOW
+    # =========================================================
+
+    def addShadow(self, widget):
+
+        shadow = QGraphicsDropShadowEffect()
+
+        shadow.setBlurRadius(45)
+
+        shadow.setXOffset(0)
+
+        shadow.setYOffset(8)
+
+        shadow.setColor(
+            QColor(0, 0, 0, 35)
+        )
+
+        widget.setGraphicsEffect(
+            shadow
+        )
+
+    # =========================================================
+    # COLOR ROW
+    # =========================================================
+
+    def createColorRow(
+        self,
+        label_text,
+        color,
+        callback
+    ):
+
+        container = QWidget()
+
+        layout = QHBoxLayout(container)
+
+        layout.setContentsMargins(
+            0,
+            0,
+            0,
+            0
+        )
+
+        layout.setSpacing(14)
+
+        label = QLabel(label_text)
+
+        label.setMinimumWidth(150)
+
+        button = QPushButton(color)
+
+        button.setCursor(
+            QtGui.QCursor(
+                Qt.PointingHandCursor
+            )
+        )
+
+        button.setMinimumHeight(56)
+
+        button.setSizePolicy(
+            QSizePolicy.Expanding,
+            QSizePolicy.Fixed
+        )
+
+        textColor = (
+            "#000000"
+            if color.upper() == "#FFFFFF"
+            else "#FFFFFF"
+        )
+
+        button.setStyleSheet(f"""
+        QPushButton {{
+            background-color: {color};
+            color: {textColor};
+            border: 2px solid #dbe2ea;
+            border-radius: 16px;
+            font-size: 15px;
+            font-weight: 700;
+        }}
+
+        QPushButton:hover {{
+            border: 2px solid #2563eb;
+        }}
+        """)
+
+        if callback:
+            button.clicked.connect(callback)
+
+        layout.addWidget(label)
+
+        layout.addWidget(button)
+
+        return {
+            "widget": container,
+            "button": button
+        }

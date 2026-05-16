@@ -1,100 +1,393 @@
-from PyQt5.QtCore import QEvent,QPoint
-from PyQt5 import QtWidgets as qt
-from PyQt5 import QtGui as gui
-from PyQt5 import QtCore
-from QrGenUI import Ui_MainWindow as ui
+import sys
 import os
-from threading import *
+import datetime
+from threading import Thread
 
-class Window(qt.QMainWindow):
+import qrcode
 
+from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPixmap, QIcon
+from PyQt5.QtWidgets import (
+    QApplication,
+    QColorDialog,
+    QMessageBox,
+    QSizePolicy,
+)
+
+from qrcode.image.styledpil import StyledPilImage
+from qrcode.image.styles.moduledrawers.pil import RoundedModuleDrawer
+from qrcode.image.styles.colormasks import RadialGradiantColorMask
+
+from QrGenUI import QRGenerator
+
+
+class Window(QRGenerator):
+
+    # =========================================================
+    # SIGNALS
+    # =========================================================
+
+    error_signal = QtCore.pyqtSignal(str)
+    status_signal = QtCore.pyqtSignal(str)
+    preview_signal = QtCore.pyqtSignal(str)
 
     def __init__(self):
-        super(Window, self).__init__()
+        super().__init__()
 
-        self.ui = ui()
-        self.ui.setupUi(self) # Initalize UI
+        self.current_qr_path = None
 
-        self.ui.pushButton.clicked.connect(self.thread)
-        
-        
-    def GenerateQRCode(self):
-        
-        font = gui.QFont()
-        font.setPointSize(13)
-        self.ui.label_5.setFont(font)
-        self.ui.label_5.setText("Generating...")
+        # =====================================================
+        # STATUS LABEL
+        # =====================================================
+
+        self.statusLabel = QtWidgets.QLabel("Ready")
+
+        self.statusLabel.setAlignment(Qt.AlignCenter)
+        self.statusLabel.setWordWrap(True)
+        self.statusLabel.setStyleSheet("""
+        color: #475569;
+        font-size: 14px;
+        font-weight: 600;
+        """)
+
+        self.statusFrame = QtWidgets.QFrame()
+        self.statusFrame.setStyleSheet("""
+        QFrame {
+            background-color: #f8fafc;
+            border-radius: 16px;
+        }
+        """)
+
+        statusLayout = QtWidgets.QHBoxLayout(self.statusFrame)
+        statusLayout.setContentsMargins(16, 10, 16, 10)
+        statusLayout.setSpacing(0)
+        statusLayout.addWidget(self.statusLabel)
+
+        self.previewLayout.addWidget(
+            self.statusFrame
+        )
+
+        # =====================================================
+        # SIGNAL CONNECTIONS
+        # =====================================================
+
+        self.error_signal.connect(self.showError)
+
+        self.status_signal.connect(self.setStatus)
+
+        self.preview_signal.connect(self.setPreview)
+
+        # =====================================================
+        # BUTTON CONNECTIONS
+        # =====================================================
+
+        self.bgButton["button"].clicked.connect(
+            self.changeBackgroundColor
+        )
+
+        self.centerButton["button"].clicked.connect(
+            self.changeCenterColor
+        )
+
+        self.edgeButton["button"].clicked.connect(
+            self.changeEdgeColor
+        )
+
+        self.generateButton.clicked.connect(
+            self.startQRGeneration
+        )
+
+    # =========================================================
+    # BUTTON STYLE UPDATER
+    # =========================================================
+
+    def updateButtonStyle(
+        self,
+        button,
+        color
+    ):
+
+        textColor = (
+            "#000000"
+            if color.upper() == "#FFFFFF"
+            else "#FFFFFF"
+        )
+
+        button.setText(color)
+
+        button.setStyleSheet(f"""
+        QPushButton {{
+            background-color: {color};
+            color: {textColor};
+            border: 2px solid #dbe2ea;
+            border-radius: 16px;
+            font-size: 15px;
+            font-weight: 700;
+        }}
+
+        QPushButton:hover {{
+            border: 2px solid #2563eb;
+        }}
+        """)
+
+    # =========================================================
+    # COLOR PICKERS
+    # =========================================================
+
+    def changeBackgroundColor(self):
+
+        color = QColorDialog.getColor()
+
+        if color.isValid():
+
+            self.bg_color = color.name()
+
+            self.updateButtonStyle(
+                self.bgButton["button"],
+                self.bg_color
+            )
+
+    def changeCenterColor(self):
+
+        color = QColorDialog.getColor()
+
+        if color.isValid():
+
+            self.center_color = color.name()
+
+            self.updateButtonStyle(
+                self.centerButton["button"],
+                self.center_color
+            )
+
+    def changeEdgeColor(self):
+
+        color = QColorDialog.getColor()
+
+        if color.isValid():
+
+            self.edge_color = color.name()
+
+            self.updateButtonStyle(
+                self.edgeButton["button"],
+                self.edge_color
+            )
+
+    # =========================================================
+    # UTILITIES
+    # =========================================================
+
+    def hexToRgb(self, hexval):
+
+        if not hexval.startswith('#') or len(hexval) != 7:
+
+            raise ValueError(
+                "Color must be a hex string like #RRGGBB"
+            )
+
+        h = hexval[1:]
+
+        return (
+            int(h[0:2], 16),
+            int(h[2:4], 16),
+            int(h[4:6], 16)
+        )
+
+    def generateFilename(self):
+
+        timestamp = datetime.datetime.now().strftime(
+            "%Y-%m-%d_%H-%M-%S"
+        )
+
+        return os.path.join(
+            os.getcwd(),
+            f"QRCODEGen_{timestamp}.png"
+        )
+
+    # =========================================================
+    # THREAD STARTER
+    # =========================================================
+
+    def startQRGeneration(self):
+
+        worker = Thread(
+            target=self.generateQR
+        )
+
+        worker.daemon = True
+
+        worker.start()
+
+    # =========================================================
+    # QR GENERATOR
+    # =========================================================
+
+    def generateQR(self):
+
+        self.status_signal.emit(
+            "Generating QR Code..."
+        )
 
         try:
 
-            import qrcode,datetime
-            from textwrap import wrap
-            from qrcode.image.styledpil import StyledPilImage
-            from qrcode.image.styles.moduledrawers.pil import RoundedModuleDrawer
-            from qrcode.image.styles.colormasks import RadialGradiantColorMask
-            
-            def hex2dec(hexval):
-                h = hexval[+1:]
-                return (int(wrap(h,2)[0],base=16),int(wrap(h,2)[1],base=16),int(wrap(h,2)[2],base=16))
-            
-            def filenameGen():
-                fnm = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                fnm = fnm.replace(':','-')
-                fnm = 'QRCODEGen_'+fnm.replace(' ','_')+'.png'
-                return fnm
-            
-            qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
+            text = self.textEdit.toPlainText().strip()
 
-            qr.add_data(self.ui.plainTextEdit.toPlainText())
-            
-            img_1 = qr.make_image(image_factory=StyledPilImage,
-                    color_mask=RadialGradiantColorMask(back_color=hex2dec(self.ui.lineEdit.text()),
-                    center_color=hex2dec(self.ui.lineEdit_2.text()),edge_color=hex2dec(self.ui.lineEdit_3.text())))
-            img_2 = qr.make_image(image_factory=StyledPilImage,
-                    module_drawer=RoundedModuleDrawer(),
-                    color_mask=RadialGradiantColorMask(back_color=hex2dec(self.ui.lineEdit.text()),
-                    center_color=hex2dec(self.ui.lineEdit_2.text()),edge_color=hex2dec(self.ui.lineEdit_3.text())))
+            if not text:
 
-            if self.ui.checkBox.isChecked() :
-                type(img_2)
-                filepath = os.popen('cd').read().replace('\n','')+'\\'
-                filename = filepath+filenameGen()
-                img_2.save(filenameGen())
-                pixmap = gui.QPixmap(filename)
-                self.ui.lblIMG.setPixmap(pixmap)
+                raise ValueError(
+                    "Please enter text or URL for QR generation."
+                )
 
-                font = gui.QFont()
-                font.setPointSize(10)
-                self.ui.label_5.setFont(font)
-                self.ui.label_5.setText(f"Image saved :\n {filepath}")
-            else:
-                type(img_1)
-                filepath = os.popen('cd').read().replace('\n','')+'\\'
-                filename = filepath+filenameGen()
-                img_1.save(filenameGen())
-                pixmap = gui.QPixmap(filename)
-                self.ui.lblIMG.setPixmap(pixmap)
-                
-                font = gui.QFont()
-                font.setPointSize(10)
-                self.ui.label_5.setFont(font)
-                self.ui.label_5.setText(f"Image saved :\n {filepath}")
-            
-        except Exception as e:
-            msg1 = qt.QMessageBox()
-            msg1.setIcon(qt.QMessageBox.Warning)
-            msg1.setText(str(e))
-            msg1.setWindowTitle("Error")
-            msg1.setStandardButtons(qt.QMessageBox.Ok)
-            msg1.exec_()
+            qr = qrcode.QRCode(
+                error_correction=qrcode.constants.ERROR_CORRECT_H,
+                box_size=14,
+                border=2
+            )
 
-    def thread(self):
-        t1=Thread(target=self.GenerateQRCode)
-        t1.start()
+            qr.add_data(text)
 
+            qr.make(fit=True)
 
-# Run Application
-app = qt.QApplication([])
-application = Window()
-application.show()
-app.exec()
+            background_rgb = self.hexToRgb(
+                self.bg_color
+            )
+
+            center_rgb = self.hexToRgb(
+                self.center_color
+            )
+
+            edge_rgb = self.hexToRgb(
+                self.edge_color
+            )
+
+            qr_kwargs = {
+                'image_factory': StyledPilImage,
+
+                'color_mask': RadialGradiantColorMask(
+                    back_color=background_rgb,
+                    center_color=center_rgb,
+                    edge_color=edge_rgb,
+                ),
+            }
+
+            if self.roundedCheck.isChecked():
+
+                qr_kwargs[
+                    'module_drawer'
+                ] = RoundedModuleDrawer()
+
+            img = qr.make_image(
+                **qr_kwargs
+            )
+
+            filename = self.generateFilename()
+
+            img.save(filename)
+
+            self.current_qr_path = filename
+
+            self.preview_signal.emit(
+                filename
+            )
+
+            self.status_signal.emit(
+                f"Saved Successfully:\n{filename}"
+            )
+
+        except Exception as error:
+
+            self.error_signal.emit(
+                str(error)
+            )
+
+            self.status_signal.emit(
+                "Ready"
+            )
+
+    # =========================================================
+    # PREVIEW SETTER
+    # =========================================================
+
+    def setPreview(self, filename):
+
+        pixmap = QPixmap(filename)
+
+        if pixmap.isNull():
+            return
+
+        size = min(
+            self.preview.width() - 60,
+            self.preview.height() - 60
+        )
+
+        scaled = pixmap.scaled(
+            size,
+            size,
+            Qt.KeepAspectRatio,
+            Qt.SmoothTransformation
+        )
+
+        self.preview.setPixmap(
+            scaled
+        )
+
+    # =========================================================
+    # STATUS SETTER
+    # =========================================================
+
+    def setStatus(self, text):
+
+        text = text.replace("\n", " — ")
+
+        self.statusLabel.setText(
+            text
+        )
+
+    # =========================================================
+    # ERROR POPUP
+    # =========================================================
+
+    def showError(self, message):
+
+        msg = QMessageBox(self)
+
+        msg.setIcon(
+            QMessageBox.Warning
+        )
+
+        msg.setWindowTitle(
+            "Error"
+        )
+
+        msg.setText(message)
+
+        msg.setStandardButtons(
+            QMessageBox.Ok
+        )
+
+        msg.exec_()
+
+# =============================================================
+# MAIN APPLICATION
+# =============================================================
+
+if __name__ == "__main__":
+
+    app = QApplication(sys.argv)
+
+    app.setStyle("Fusion")
+
+    icon_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "AppLogo.png"
+    )
+
+    app.setWindowIcon(QIcon(icon_path))
+
+    window = Window()
+    window.setWindowIcon(QIcon(icon_path))
+
+    window.show()
+
+    sys.exit(app.exec_())
